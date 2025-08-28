@@ -2,7 +2,6 @@
 
 session_start();
 
-/* 🔗 رابط ملفك على GitHub (عدّليه لو تغيّر المسار أو الفرع) */
 $github_link = "https://github.com/Leenah-alborsh/phpAS3/blob/main/table.php";
 
 /*  البيانات */
@@ -815,5 +814,6 @@ function donutSegments($buckets)
 
   </div>
 </body>
+
 
 </html>
