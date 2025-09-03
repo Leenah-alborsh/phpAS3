@@ -5,7 +5,7 @@ session_start();
 $github_link = "https://github.com/Leenah-alborsh/phpAS3/blob/main/table.php";
 
 /*  البيانات */
-if (isset($_SESSION['students'])) {
+if (!isset($_SESSION['students'])) {
   $_SESSION['students'] = [
     ['stdNo' => '20003', 'stdName' => 'Ahmed Ali', 'stdEmail' => 'ahmed@gmail.com', 'stdGAP' => 88.7],
     ['stdNo' => '30304', 'stdName' => 'Mona Khalid', 'stdEmail' => 'mona@gmail.com', 'stdGAP' => 78.5],
@@ -14,21 +14,16 @@ if (isset($_SESSION['students'])) {
     ['stdNo' => '10007', 'stdName' => 'Mohammed ahmed', 'stdEmail' => 'mohamed@gmail.com', 'stdGAP' => 98.7],
   ];
 }
-$students = $_SESSION['students'];
+$students = $_SESSION['students'] ?? [];
 
 /* دوال  */
 function letterOf($g)
 {
-  if ($g >= 97)
-    return 'A+';
-  if ($g >= 90)
-    return 'A';
-  if ($g >= 80)
-    return 'B';
-  if ($g >= 70)
-    return 'C';
-  if ($g >= 60)
-    return 'D';
+  if ($g >= 97) return 'A+';
+  if ($g >= 90) return 'A';
+  if ($g >= 80) return 'B';
+  if ($g >= 70) return 'C';
+  if ($g >= 60) return 'D';
   return 'F';
 }
 function gradeBadgeClass($grade)
@@ -58,8 +53,7 @@ function hidden_keep_fields($fields)
 function findIndexByNo($arr, $no)
 {
   foreach ($arr as $i => $row) {
-    if ($row['stdNo'] === $no)
-      return $i;
+    if ($row['stdNo'] === $no) return $i;
   }
   return -1;
 }
@@ -148,13 +142,13 @@ $T = [
 ];
 
 /*  لأخذ مدخلات  */
-$q = $_GET['q'] ?? '';
+$q     = $_GET['q']   ?? '';
 $grade = $_GET['grade'] ?? '';
-$sort = $_GET['sort'] ?? 'stdNo';
-$dirS = $_GET['dir'] ?? 'asc';
-$view = $_GET['view'] ?? 'table';
+$sort  = $_GET['sort']  ?? 'stdNo';
+$dirS  = $_GET['dir']   ?? 'asc';
+$view  = $_GET['view']  ?? 'table';
 $theme = $_GET['theme'] ?? 'light';
-$export = $_GET['export'] ?? '';
+$export= $_GET['export']?? '';
 
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
@@ -163,17 +157,16 @@ $editNo = $_GET['edit'] ?? null;
 $editRow = null;
 if ($editNo !== null) {
   $idx = findIndexByNo($students, $editNo);
-  if ($idx >= 0)
-    $editRow = $students[$idx];
+  if ($idx >= 0) $editRow = $students[$idx];
 }
 
 $action = $_POST['action'] ?? null;
 if ($action) {
   $in = [
-    'stdNo' => trim($_POST['stdNo'] ?? ''),
-    'stdName' => trim($_POST['stdName'] ?? ''),
+    'stdNo'    => trim($_POST['stdNo'] ?? ''),
+    'stdName'  => trim($_POST['stdName'] ?? ''),
     'stdEmail' => trim($_POST['stdEmail'] ?? ''),
-    'stdGAP' => isset($_POST['stdGAP']) ? floatval($_POST['stdGAP']) : null,
+    'stdGAP'   => isset($_POST['stdGAP']) ? floatval($_POST['stdGAP']) : null,
   ];
   $errors = [];
 
@@ -262,7 +255,8 @@ if ($export === 'csv') {
 if ($export === 'json') {
   header('Content-Type: application/json; charset=UTF-8');
   echo json_encode(array_map(function ($s) {
-    return $s + ['grade' => letterOf($s['stdGAP'])]; }, array_values($filtered)), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    return $s + ['grade' => letterOf($s['stdGAP'])];
+  }, array_values($filtered)), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
   exit;
 }
 if ($export === 'print') {
@@ -275,27 +269,11 @@ if ($export === 'print') {
     <title><?= htmlspecialchars($T[$lang]['title']) ?> - Print</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-      body {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-      }
-
-      h4 {
-        margin: 1rem 0;
-      }
-
-      .small-muted {
-        color: #6c757d;
-      }
-
-      @media print {
-        .no-print {
-          display: none !important;
-        }
-      }
-
-      .badge {
-        border-radius: 999px;
-      }
+      body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+      h4 { margin: 1rem 0; }
+      .small-muted { color: #6c757d; }
+      @media print { .no-print { display: none !important; } }
+      .badge { border-radius: 999px; }
     </style>
   </head>
 
@@ -317,9 +295,7 @@ if ($export === 'print') {
         </tr>
       </thead>
       <tbody>
-        <?php $i = 1;
-        foreach ($filtered as $s):
-          $L = letterOf($s['stdGAP']); ?>
+        <?php $i = 1; foreach ($filtered as $s): $L = letterOf($s['stdGAP']); ?>
           <tr>
             <td><?= $i++ ?></td>
             <td><?= htmlspecialchars($s['stdNo']) ?></td>
@@ -362,8 +338,7 @@ function donutSegments($buckets)
   }
   $offset = 0;
   foreach ($buckets as $g => $n) {
-    if ($n <= 0)
-      continue;
+    if ($n <= 0) continue;
     $dash = ($n / $total) * $C;
     $out[] = ['dash' => $dash, 'gap' => $C - $dash, 'offset' => -$offset, 'color' => $colors[$g]];
     $offset += $dash;
@@ -381,10 +356,7 @@ function donutSegments($buckets)
   <title><?= htmlspecialchars($T[$lang]['title']) ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    :root {
-      --accent: #6f6cf8;
-    }
-
+    :root { --accent: #6f6cf8; }
     /* نهاري */
     body {
       min-height: 100vh;
@@ -392,7 +364,6 @@ function donutSegments($buckets)
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
       color: #212529;
     }
-
     /* ليلي */
     [data-bs-theme="dark"] body {
       background:
@@ -401,7 +372,6 @@ function donutSegments($buckets)
         linear-gradient(135deg, #0b1220, #141c2c);
       color: #f8f9fa;
     }
-
     .glass {
       background: rgba(255, 255, 255, .95);
       border: 1px solid #d6e9f9;
@@ -409,130 +379,42 @@ function donutSegments($buckets)
       border-radius: 20px;
       transition: all .25s;
     }
-
     [data-bs-theme="dark"] .glass {
       background: rgba(255, 255, 255, .08);
       border-color: rgba(255, 255, 255, .2);
     }
-
-    .glass:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
-    }
-
+    .glass:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
     .cardx {
-      background: #fff;
-      border: 1px solid #d6e9f9;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-      border-radius: 18px;
-      transition: all .25s;
+      background: #fff; border: 1px solid #d6e9f9; box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+      border-radius: 18px; transition: all .25s;
     }
-
     [data-bs-theme="dark"] .cardx {
-      background: rgba(255, 255, 255, .05);
-      border-color: rgba(255, 255, 255, .2);
+      background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.2);
     }
-
-    .cardx:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, .15);
+    .cardx:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+    .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); transition: all .2s; }
+    .btn-accent:hover, .btn-accent:focus {
+      background: #5856d6; border-color: #5856d6; color: #fff; box-shadow: 0 0 0 .25rem rgba(111,108,248,.35);
     }
-
-    .btn-accent {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      transition: all .2s;
-    }
-
-    .btn-accent:hover,
-    .btn-accent:focus {
-      background: #5856d6;
-      border-color: #5856d6;
-      color: #fff;
-      box-shadow: 0 0 0 .25rem rgba(111, 108, 248, .35);
-    }
-
-    .btn-outline-primary:hover {
-      background: #0d6efd;
-      color: #fff;
-    }
-
-    .btn-outline-secondary:hover {
-      background: #6c757d;
-      color: #fff;
-    }
-
-    .btn-outline-success:hover {
-      background: #198754;
-      color: #fff;
-    }
-
-    .btn-outline-danger:hover {
-      background: #dc3545;
-      color: #fff;
-    }
-
-    .btn-outline-info:hover {
-      background: #0dcaf0;
-      color: #fff;
-    }
-
-    .btn-outline-dark:hover {
-      background: #212529;
-      color: #fff;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      transition: color .2s;
-    }
-
-    a:hover {
-      color: #4834d4;
-      text-decoration: underline;
-    }
-
-    .table thead th a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-inline-end: 6px;
-    }
-
-    .chip {
-      border-radius: 999px;
-      padding: .2rem .6rem;
-      font-weight: 600;
-    }
-
-    .subtle {
-      color: #495057;
-    }
-
-    [data-bs-theme="dark"] .subtle {
-      color: #adb5bd;
-    }
-
+    .btn-outline-primary:hover { background: #0d6efd; color: #fff; }
+    .btn-outline-secondary:hover { background: #6c757d; color: #fff; }
+    .btn-outline-success:hover { background: #198754; color: #fff; }
+    .btn-outline-danger:hover { background: #dc3545; color: #fff; }
+    .btn-outline-info:hover { background: #0dcaf0; color: #fff; }
+    .btn-outline-dark:hover { background: #212529; color: #fff; }
+    a { color: var(--accent); text-decoration: none; transition: color .2s; }
+    a:hover { color: #4834d4; text-decoration: underline; }
+    .table thead th a { text-decoration: none; color: inherit; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-inline-end: 6px; }
+    .chip { border-radius: 999px; padding: .2rem .6rem; font-weight: 600; }
+    .subtle { color: #495057; }
+    [data-bs-theme="dark"] .subtle { color: #adb5bd; }
     /*  كرت التسليم */
     .submit-card {
-      border-radius: 14px;
-      padding: 12px 16px;
-      border: 1px solid #d6e9f9;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+      border-radius: 14px; padding: 12px 16px; border: 1px solid #d6e9f9; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
-
     [data-bs-theme="dark"] .submit-card {
-      background: rgba(255, 255, 255, .06);
-      border-color: rgba(255, 255, 255, .2);
+      background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.2);
     }
   </style>
 </head>
@@ -549,8 +431,7 @@ function donutSegments($buckets)
           <?php echo htmlspecialchars($github_link, ENT_QUOTES, 'UTF-8'); ?>
         </a>
       </div>
-      <a class="btn btn-accent btn-sm" href="<?php echo htmlspecialchars($github_link, ENT_QUOTES, 'UTF-8'); ?>"
-        target="_blank" rel="noopener">
+      <a class="btn btn-accent btn-sm" href="<?php echo htmlspecialchars($github_link, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
         فتح الملف على GitHub
       </a>
     </div>
@@ -566,10 +447,8 @@ function donutSegments($buckets)
         <a class="btn btn-outline-secondary" href="<?= keep(['theme' => $theme === 'dark' ? 'light' : 'dark']) ?>">🌓
           <?= htmlspecialchars($T[$lang]['toggleTheme']) ?></a>
         <div class="btn-group">
-          <a class="btn <?= $view === 'table' ? 'btn-accent' : 'btn-outline-secondary' ?>"
-            href="<?= keep(['view' => 'table']) ?>"><?= htmlspecialchars($T[$lang]['toggleView']['table']) ?></a>
-          <a class="btn <?= $view === 'cards' ? 'btn-accent' : 'btn-outline-secondary' ?>"
-            href="<?= keep(['view' => 'cards']) ?>"><?= htmlspecialchars($T[$lang]['toggleView']['cards']) ?></a>
+          <a class="btn <?= $view === 'table' ? 'btn-accent' : 'btn-outline-secondary' ?>" href="<?= keep(['view' => 'table']) ?>"><?= htmlspecialchars($T[$lang]['toggleView']['table']) ?></a>
+          <a class="btn <?= $view === 'cards' ? 'btn-accent' : 'btn-outline-secondary' ?>" href="<?= keep(['view' => 'cards']) ?>"><?= htmlspecialchars($T[$lang]['toggleView']['cards']) ?></a>
         </div>
         <!-- الأزرار  -->
         <div class="btn-group">
@@ -605,16 +484,14 @@ function donutSegments($buckets)
         </div>
         <div class="col-12 col-md-3">
           <label class="form-label"><?= htmlspecialchars($T[$lang]['stdGAP']) ?></label>
-          <input name="stdGAP" type="number" step="0.1" min="0" max="100" class="form-control"
-            value="<?= htmlspecialchars($editRow['stdGAP'] ?? '') ?>">
+          <input name="stdGAP" type="number" step="0.1" min="0" max="100" class="form-control" value="<?= htmlspecialchars($editRow['stdGAP'] ?? '') ?>">
         </div>
         <div class="col-12 d-flex gap-2">
           <?php if ($editRow): ?>
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="originalNo" value="<?= htmlspecialchars($_GET['edit']) ?>">
             <button class="btn btn-accent"><?= htmlspecialchars($T[$lang]['save']) ?></button>
-            <a class="btn btn-outline-secondary"
-              href="<?= keep(['edit' => null]) ?>"><?= htmlspecialchars($T[$lang]['cancel']) ?></a>
+            <a class="btn btn-outline-secondary" href="<?= keep(['edit' => null]) ?>"><?= htmlspecialchars($T[$lang]['cancel']) ?></a>
           <?php else: ?>
             <input type="hidden" name="action" value="create">
             <button class="btn btn-accent"><?= htmlspecialchars($T[$lang]['addStudent']) ?></button>
@@ -629,8 +506,7 @@ function donutSegments($buckets)
       <div class="row g-3 align-items-end">
         <div class="col-12 col-md-7">
           <label class="form-label"><?= htmlspecialchars($T[$lang]['searchPh']) ?></label>
-          <input name="q" value="<?= htmlspecialchars($q) ?>" type="search" class="form-control"
-            placeholder="<?= htmlspecialchars($T[$lang]['searchPh']) ?>">
+          <input name="q" value="<?= htmlspecialchars($q) ?>" type="search" class="form-control" placeholder="<?= htmlspecialchars($T[$lang]['searchPh']) ?>">
         </div>
         <div class="col-8 col-md-3">
           <label class="form-label"><?= htmlspecialchars($T[$lang]['grade']) ?></label>
@@ -720,28 +596,23 @@ function donutSegments($buckets)
     <?php if ($view === 'cards'): ?>
       <!--  عشكل البطاقات -->
       <div class="row g-4">
-        <?php foreach ($filtered as $s):
-          $L = letterOf($s['stdGAP']); ?>
+        <?php foreach ($filtered as $s): $L = letterOf($s['stdGAP']); ?>
           <div class="col-12 col-md-6 col-lg-4">
             <div class="card cardx p-3">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
                   <h5 class="m-0"><?= htmlspecialchars($s['stdName']) ?></h5>
-                  <small class="subtle"><?= $lang === 'ar' ? 'الرقم:' : 'ID:' ?>     <?= htmlspecialchars($s['stdNo']) ?></small>
+                  <small class="subtle"><?= $lang === 'ar' ? 'الرقم:' : 'ID:' ?> <?= htmlspecialchars($s['stdNo']) ?></small>
                 </div>
                 <span class="badge <?= gradeBadgeClass($L) ?> chip"><?= $T[$lang]['legend'][$L] ?></span>
               </div>
-              <div class="mt-2 small subtle">📧 <a
-                  href="mailto:<?= htmlspecialchars($s['stdEmail']) ?>"><?= htmlspecialchars($s['stdEmail']) ?></a></div>
-              <div class="mt-1 small subtle">📈 <?= $lang === 'ar' ? 'المعدل:' : 'GPA:' ?> <strong><?= $s['stdGAP'] ?></strong>
-              </div>
+              <div class="mt-2 small subtle">📧 <a href="mailto:<?= htmlspecialchars($s['stdEmail']) ?>"><?= htmlspecialchars($s['stdEmail']) ?></a></div>
+              <div class="mt-1 small subtle">📈 <?= $lang === 'ar' ? 'المعدل:' : 'GPA:' ?> <strong><?= $s['stdGAP'] ?></strong></div>
               <div class="progress mt-2" style="height:10px;">
-                <div class="progress-bar" role="progressbar"
-                  style="width: <?= min(max($s['stdGAP'], 0), 100) ?>%; background:var(--accent)"></div>
+                <div class="progress-bar" role="progressbar" style="width: <?= min(max($s['stdGAP'], 0), 100) ?>%; background:var(--accent)"></div>
               </div>
               <div class="d-flex gap-2 mt-3">
-                <a class="btn btn-sm btn-outline-primary"
-                  href="<?= keep(['edit' => $s['stdNo']]) ?>"><?= htmlspecialchars($T[$lang]['edit']) ?></a>
+                <a class="btn btn-sm btn-outline-primary" href="<?= keep(['edit' => $s['stdNo']]) ?>"><?= htmlspecialchars($T[$lang]['edit']) ?></a>
                 <form method="post" onsubmit="return confirm('<?= $lang === 'ar' ? 'تأكيد الحذف؟' : 'Confirm delete?' ?>');">
                   <input type="hidden" name="action" value="delete">
                   <input type="hidden" name="stdNo" value="<?= htmlspecialchars($s['stdNo']) ?>">
@@ -771,7 +642,7 @@ function donutSegments($buckets)
                 }
                 $heads = $T[$lang]['tableHeads'];
                 ?>
-                <th><?= sortLink($heads[0], 'stdNo') ?></th>
+                <th><?= htmlspecialchars($heads[0]) ?></th> <!-- # غير قابل للفرز -->
                 <th class="text-start"><?= sortLink($heads[1], 'stdNo') ?></th>
                 <th class="text-start"><?= sortLink($heads[2], 'stdName') ?></th>
                 <th class="text-start"><?= sortLink($heads[3], 'stdEmail') ?></th>
@@ -781,22 +652,17 @@ function donutSegments($buckets)
               </tr>
             </thead>
             <tbody>
-              <?php $i = 1;
-              foreach ($filtered as $s):
-                $L = letterOf($s['stdGAP']); ?>
+              <?php $i = 1; foreach ($filtered as $s): $L = letterOf($s['stdGAP']); ?>
                 <tr>
                   <td><?= $i++ ?></td>
                   <td class="text-start"><?= htmlspecialchars($s['stdNo']) ?></td>
                   <td class="text-start"><?= htmlspecialchars($s['stdName']) ?></td>
-                  <td class="text-start"><a
-                      href="mailto:<?= htmlspecialchars($s['stdEmail']) ?>"><?= htmlspecialchars($s['stdEmail']) ?></a></td>
+                  <td class="text-start"><a href="mailto:<?= htmlspecialchars($s['stdEmail']) ?>"><?= htmlspecialchars($s['stdEmail']) ?></a></td>
                   <td class="fw-semibold"><?= $s['stdGAP'] ?></td>
                   <td><span class="badge <?= gradeBadgeClass($L) ?> chip"><?= $T[$lang]['legend'][$L] ?></span></td>
                   <td class="text-nowrap">
-                    <a class="btn btn-sm btn-outline-primary"
-                      href="<?= keep(['edit' => $s['stdNo']]) ?>"><?= htmlspecialchars($T[$lang]['edit']) ?></a>
-                    <form method="post" style="display:inline"
-                      onsubmit="return confirm('<?= $lang === 'ar' ? 'تأكيد الحذف؟' : 'Confirm delete?' ?>');">
+                    <a class="btn btn-sm btn-outline-primary" href="<?= keep(['edit' => $s['stdNo']]) ?>"><?= htmlspecialchars($T[$lang]['edit']) ?></a>
+                    <form method="post" style="display:inline" onsubmit="return confirm('<?= $lang === 'ar' ? 'تأكيد الحذف؟' : 'Confirm delete?' ?>');">
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="stdNo" value="<?= htmlspecialchars($s['stdNo']) ?>">
                       <?php hidden_keep_fields(['lang', 'theme', 'view', 'sort', 'dir', 'q', 'grade']); ?>
@@ -814,6 +680,5 @@ function donutSegments($buckets)
 
   </div>
 </body>
-
 
 </html>
